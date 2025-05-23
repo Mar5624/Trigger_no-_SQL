@@ -1,0 +1,85 @@
+--Aula 37
+--Triggers (gatilhos)
+-------------------------------------------------------------
+
+
+use 
+
+SQL_Curso_1
+
+go
+
+create  table tbSaldos
+
+(Produto  varchar(10),
+Saldo_Inicial numeric(10),
+Saldo_Final  numeric (10),
+Data_Ult_Mov datetime
+)
+
+go
+
+insert  into tbSaldos(Produto,Saldo_Inicial, Saldo_Final,Data_Ult_Mov)
+values('Produto A',0, 100, GETDATE())
+
+Create table  tbVendas(
+ID_Vendas int,
+Produto  varchar(10),
+Quantidade int,
+Data datetime
+
+)
+
+create sequence seq_tbvendas
+as numeric
+start  with 1
+increment by 1
+
+Create table tbHistoricoVendas(
+Produto  varchar(10),
+Quantidade int,
+Data_Venda datetime
+
+
+)
+
+create  trigger tr_AjustaSaldo
+on tbVendas
+for  insert
+
+as 
+
+begin
+declare @Quantidade int,
+        @Data  datetime,
+		@Produto varchar(10)
+
+ select @Data = Data,@Quantidade = Quantidade, @Produto = Produto from inserted
+
+ Update tbSaldos
+ set Saldo_Final = Saldo_Final - @Quantidade
+ where Produto = @Produto
+ insert  into tbHistoricoVendas(Produto,Quantidade, Data_Venda)
+ values(@Produto, @Quantidade, @Data)
+
+
+
+end
+insert  into tbVendas(ID_Vendas, Produto, Quantidade, Data)
+
+values(next value  for seq_tbvendas,'Produto A',11, getdate()
+)
+
+select  *  from tbSaldos
+select*  from tbVendas
+select *  from tbHistoricoVendas
+
+drop  table tbSaldos
+
+drop  table tbVendas
+
+drop table tbHistoricoVendas
+
+drop  sequence  seq_tbvendas
+
+drop  trigger tr_AjustaSaldo
